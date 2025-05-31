@@ -24,14 +24,14 @@ export default function HomePage() {
       time: "4 hours ago",
       category: "Bags",
     },
-    // {
-    //   id: 3,
-    //   title: "Student ID Card",
-    //   type: "found",
-    //   location: "Cafeteria",
-    //   time: "1 day ago",
-    //   category: "Documents",
-    // },
+    {
+      id: 3,
+      title: "Student ID Card",
+      type: "found",
+      location: "Cafeteria",
+      time: "1 day ago",
+      category: "Documents",
+    },
   ]
 
   const stats = [
@@ -83,12 +83,12 @@ export default function HomePage() {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/auth/register">
+            <Link href="/auth/login">
               <Button size="lg" className="bg-red-500 hover:bg-red-600">
                 Report Lost Item
               </Button>
             </Link>
-            <Link href="/auth/register">
+            <Link href="/auth/login">
               <Button size="lg" className="bg-green-600 hover:bg-green-700">
                 Report Found Item
               </Button>

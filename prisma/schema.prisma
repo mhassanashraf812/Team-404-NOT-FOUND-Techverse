@@ -1,4 +1,3 @@
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,6 +7,144 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  name         String
+  studentId    String?
+  phone        String?
+  role         UserRole  @default(STUDENT)
+  password     String
+  department   String?
+  isVerified   Boolean   @default(false)
+  profileImage String?
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // Relations
+  items                 Item[]
+  claims                Claim[]
+  messages              Message[]
+  sentChats             Chat[]         @relation("SentChats")
+  receivedChats         Chat[]         @relation("ReceivedChats")
+  sentMessages          Message[]      @relation("SentMessages")
+  receivedMessages      Message[]      @relation("ReceivedMessages")
+  sentNotifications     Notification[] @relation("NotificationSender")
+  receivedNotifications Notification[] @relation("NotificationReceiver")
+
+  @@map("users")
+}
+
+model Item {
+  id            String     @id @default(cuid())
+  title         String
+  reporterEmail String?
+  description   String
+  type          ItemType
+  status        ItemStatus @default(ACTIVE)
+  location      String
+  dateFound     DateTime?
+  dateLost      DateTime?
+  images        String[]
+  tags          String[]
+  contactInfo   String?
+  reward        String?
+
+  // Foreign keys
+  userId String
+
+  // Relations
+  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category String?
+  claims   Claim[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("items")
+}
+
+model Claim {
+  id          String      @id @default(cuid())
+  description String
+  status      ClaimStatus @default(PENDING)
+  proofImages String[]
+  adminNotes  String?
+
+  itemId     String
+  claimantId String
+
+  // Relations
+  item     Item      @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  claimant User      @relation(fields: [claimantId], references: [id], onDelete: Cascade)
+  messages Message[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("claims")
+}
+
+model Message {
+  id      String  @id @default(cuid())
+  content String
+  isRead  Boolean @default(false)
+
+  // Foreign keys
+  senderId   String
+  claimId    String
+  receiverId String
+
+  // Relations
+  sender   User  @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  claim    Claim @relation(fields: [claimId], references: [id], onDelete: Cascade)
+  receiver User  @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  User      User?    @relation(fields: [userId], references: [id])
+  userId    String?
+
+  @@map("messages")
+}
+
+model Chat {
+  id      String  @id @default(cuid())
+  content String
+  isRead  Boolean @default(false)
+
+  // Foreign keys
+  senderId   String
+  receiverId String
+
+  // Relations
+  sender   User @relation("SentChats", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User @relation("ReceivedChats", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@map("chats")
+}
+
+model Notification {
+  id       String  @id @default(cuid())
+  title    String
+  isRead   Boolean @default(false)
+  metadata Json?
+
+  // Foreign keys
+  receiverId String
+  senderId   String
+
+  // Relations
+  receiver User @relation("NotificationReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  sender   User @relation("NotificationSender", fields: [senderId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@map("notifications")
+}
+
 enum UserRole {
   STUDENT
   FACULTY
@@ -15,10 +152,10 @@ enum UserRole {
 }
 
 enum ItemStatus {
+  PENDING
   ACTIVE
-  CLAIMED
   RETURNED
-  EXPIRED
+  ARCHIVED
 }
 
 enum ItemType {
@@ -31,110 +168,5 @@ enum ClaimStatus {
   APPROVED
   REJECTED
   COMPLETED
-}
-
-model User {
-  id          String   @id @default(cuid())
-  email       String   @unique
-  name        String
-  studentId   String?  @unique
-  phone       String?
-  role        UserRole @default(STUDENT)
-  department  String?
-  isVerified  Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  // Relations
-  items       Item[]
-  claims      Claim[]
-  messages    Message[]
-  
-  @@map("users")
-}
-
-model Category {
-  id          String @id @default(cuid())
-  name        String @unique
-  description String?
-  icon        String?
-  items       Item[]
-  
-  @@map("categories")
-}
-model Item {
-  id          String     @id @default(cuid())
-  title       String
-  description String
-  type        ItemType
-  status      ItemStatus @default(ACTIVE)
-  location    String
-  dateFound   DateTime?
-  dateLost    DateTime?
-  images      String[]
-  tags        String[]
-  
-  // Foreign keys
-  userId      String
-  categoryId  String
-  
-  // Relations
-  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  category    Category   @relation(fields: [categoryId], references: [id])
-  claims      Claim[]
-  
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  
-  @@map("items")
-}
-
-model Claim {
-  id          String      @id @default(cuid())
-  description String
-  status      ClaimStatus @default(PENDING)
-  proofImages String[]
-  
-  // Foreign keys
-  itemId      String
-  claimantId  String
-  
-  // Relations
-  item        Item        @relation(fields: [itemId], references: [id], onDelete: Cascade)
-  claimant    User        @relation(fields: [claimantId], references: [id], onDelete: Cascade)
-  messages    Message[]
-  
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  
-  @@map("claims")
-}
-
-model Message {
-  id        String   @id @default(cuid())
-  content   String
-  
-  // Foreign keys
-  senderId  String
-  claimId   String
-  
-  // Relations
-  sender    User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
-  claim     Claim    @relation(fields: [claimId], references: [id], onDelete: Cascade)
-  
-  createdAt DateTime @default(now())
-  
-  @@map("messages")
-}
-
-model Notification {
-  id        String   @id @default(cuid())
-  title     String
-  message   String
-  isRead    Boolean  @default(false)
-  userId    String
-  
-  createdAt DateTime @default(now())
-  
-  @@map("notifications")
+  DISPUTED
 }

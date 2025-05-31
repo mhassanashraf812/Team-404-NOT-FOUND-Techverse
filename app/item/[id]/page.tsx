@@ -21,63 +21,42 @@ import {
   AlertTriangle,
 } from "lucide-react"
 import Link from "next/link"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useParams } from "next/navigation"
+import axios from "axios"
 
 export default function ItemDetailPage() {
-  const [claimText, setClaimText] = useState("")
-  const [showClaimForm, setShowClaimForm] = useState(false)
+  const params = useParams();
+  const itemId = params?.id as string;
+  const [item, setItem] = useState<any>(null);
+  const [recentClaims, setRecentClaims] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [claimText, setClaimText] = useState("");
+  const [showClaimForm, setShowClaimForm] = useState(false);
 
-  // Mock item data - in real app, this would come from params and API
-  const item = {
-    id: 1,
-    title: "iPhone 14 Pro - Space Black",
-    description:
-      "Lost my iPhone 14 Pro in space black color. Has a clear case with a small crack on the back. Last seen in the library on the 2nd floor near the study tables. The phone has a mountain landscape wallpaper and contains my student ID card behind the case. Very important as it contains all my academic work and personal photos. Please contact me if found - willing to provide reward.",
-    type: "lost",
-    category: "Electronics",
-    location: "Library 2nd Floor",
-    specificLocation: "Near the study tables, section C",
-    dateReported: "2024-01-15",
-    timeReported: "14:30",
-    dateLost: "2024-01-14",
-    timeLost: "16:45",
-    status: "active",
-    views: 156,
-    claims: 3,
-    tags: ["urgent", "valuable", "electronic", "reward"],
-    images: [
-      "/placeholder.svg?height=400&width=600",
-      "/placeholder.svg?height=400&width=600",
-      "/placeholder.svg?height=400&width=600",
-    ],
-    owner: {
-      name: "Sarah Ahmed",
-      role: "Student",
-      department: "Computer Science",
-      joinDate: "2023-09-01",
-      itemsPosted: 2,
-      itemsRecovered: 1,
-      verified: true,
-      avatar: "/placeholder.svg?height=40&width=40",
-    },
+  useEffect(() => {
+    if (!itemId) return;
+    const fetchItem = async () => {
+      setLoading(true);
+      try {
+        const res = await axios.get(`/api/items/${itemId}`);
+        setItem(res.data);
+        setRecentClaims(res.data.claims?.slice(-3).reverse() || []);
+      } catch (err) {
+        setItem(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchItem();
+  }, [itemId]);
+
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
-
-  const recentClaims = [
-    {
-      id: 1,
-      claimant: "Ahmed Khan",
-      date: "2024-01-15",
-      status: "pending",
-      message: "I found a phone matching this description in the library yesterday...",
-    },
-    {
-      id: 2,
-      claimant: "Maria Ali",
-      date: "2024-01-15",
-      status: "rejected",
-      message: "I have an iPhone but it's a different model...",
-    },
-  ]
+  if (!item) {
+    return <div className="min-h-screen flex items-center justify-center text-red-500">Item not found.</div>;
+  }
 
   const handleClaim = () => {
     if (claimText.trim()) {
@@ -144,9 +123,9 @@ export default function ItemDetailPage() {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
        
-          <div className="lg:col-span-2 space-y-6">
+          <div className="xl:col-span-2 space-y-6">
            
             <Card>
               <CardContent className="p-0">
@@ -161,7 +140,7 @@ export default function ItemDetailPage() {
                 {item.images.length > 1 && (
                   <div className="p-4">
                     <div className="grid grid-cols-4 gap-2">
-                      {item.images.slice(1).map((image, index) => (
+                      {item.images.slice(1).map((image: string, index: number) => (
                         <div key={index} className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
                           <img
                             src={image || "/placeholder.svg"}
@@ -242,7 +221,7 @@ export default function ItemDetailPage() {
                 <div>
                   <h4 className="font-medium text-gray-900 mb-2">Tags</h4>
                   <div className="flex flex-wrap gap-2">
-                    {item.tags.map((tag) => (
+                    {item.tags.map((tag: string) => (
                       <Badge key={tag} variant="outline">
                         {tag}
                       </Badge>
@@ -258,7 +237,7 @@ export default function ItemDetailPage() {
                     </span>
                     <span className="flex items-center">
                       <MessageCircle className="w-4 h-4 mr-1" />
-                      {item.claims} claims
+                      {item.claims.length} claims
                     </span>
                   </div>
                   <Badge variant="outline">{item.category}</Badge>
@@ -269,19 +248,17 @@ export default function ItemDetailPage() {
             {/* Claim Form */}
             {!showClaimForm ? (
               <Card>
-                <CardContent className="p-6 text-center">
+                {/* <CardContent className="p-6 text-center">
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">
                     {item.type === "lost" ? "Found This Item?" : "Is This Yours?"}
                   </h3>
                   <p className="text-gray-600 mb-4">
                     {item.type === "lost"
                       ? "If you found this item, click below to help return it to the owner."
-                      : "If this item belongs to you, click below to claim it."}
+                      : "If this item belongs to you go back and clain it now."}
                   </p>
-                  <Button onClick={() => setShowClaimForm(true)} className="bg-blue-600 hover:bg-blue-700">
-                    {item.type === "lost" ? "I Found This Item" : "This Is Mine"}
-                  </Button>
-                </CardContent>
+                  
+                </CardContent> */}
               </Card>
             ) : (
               <Card>
@@ -328,16 +305,16 @@ export default function ItemDetailPage() {
                   <CardDescription>Other users who have claimed this item</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {recentClaims.map((claim) => (
+                  {recentClaims.map((claim: any) => (
                     <div key={claim.id} className="border border-gray-200 rounded-lg p-4">
                       <div className="flex justify-between items-start mb-2">
                         <div>
-                          <p className="font-medium text-gray-900">{claim.claimant}</p>
-                          <p className="text-sm text-gray-600">{claim.date}</p>
+                          <p className="font-medium text-gray-900">{claim.claimant?.name || "Unknown"}</p>
+                          <p className="text-sm text-gray-600">{claim.createdAt ? new Date(claim.createdAt).toLocaleDateString() : ""}</p>
                         </div>
                         <Badge className={getClaimStatusColor(claim.status)}>{claim.status}</Badge>
                       </div>
-                      <p className="text-sm text-gray-700">{claim.message}</p>
+                      <p className="text-sm text-gray-700">{claim.description || claim.message || "No message provided."}</p>
                     </div>
                   ))}
                 </CardContent>
@@ -346,7 +323,7 @@ export default function ItemDetailPage() {
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
+          <div className="space-y-6 w-full xl:w-auto">
             {/* Owner Information */}
             <Card>
               <CardHeader>
@@ -355,46 +332,40 @@ export default function ItemDetailPage() {
               <CardContent>
                 <div className="flex items-start space-x-3">
                   <Avatar className="w-12 h-12">
-                    <AvatarImage src={item.owner.avatar || "/placeholder.svg"} />
+                    <AvatarImage src={item.user.avatar || "/placeholder.svg"} />
                     <AvatarFallback>
-                      {item.owner.name
+                      {item.user.name
                         .split(" ")
-                        .map((n) => n[0])
+                        .map((n: string) => n[0])
                         .join("")}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
                     <div className="flex items-center space-x-2">
-                      <h4 className="font-medium text-gray-900">{item.owner.name}</h4>
-                      {item.owner.verified && <CheckCircle className="w-4 h-4 text-green-500" />}
+                      <h4 className="font-medium text-gray-900">{item.user.name}</h4>
+                      {item.user.verified && <CheckCircle className="w-4 h-4 text-green-500" />}
                     </div>
-                    <p className="text-sm text-gray-600">{item.owner.role}</p>
-                    <p className="text-sm text-gray-600">{item.owner.department}</p>
+                    <p className="text-sm text-gray-600">{item.user.role}</p>
+                    <p className="text-sm text-gray-600">{item.user.department}</p>
                   </div>
                 </div>
 
                 <div className="mt-4 space-y-2 text-sm text-gray-600">
                   <div className="flex items-center">
                     <Calendar className="w-4 h-4 mr-2" />
-                    <span>Joined {item.owner.joinDate}</span>
+                    <span>Joined {item.user.joinDate}</span>
                   </div>
                   <div className="flex items-center">
                     <User className="w-4 h-4 mr-2" />
-                    <span>{item.owner.itemsPosted} items posted</span>
+                    <span>{item.user.itemsPosted} items posted</span>
                   </div>
                   <div className="flex items-center">
-                    <CheckCircle className="w-4 h-4 mr-2" />
-                    <span>{item.owner.itemsRecovered} items recovered</span>
+                    {/* <CheckCircle className="w-4 h-4 mr-2" /> */}
+                    {/* <span>{item.user.itemsRecovered} items recovered</span> */}
                   </div>
                 </div>
 
                 <div className="mt-4 space-y-2">
-                  <Link href="/chat">
-                    <Button className="w-full bg-blue-600 hover:bg-blue-700">
-                      <MessageCircle className="w-4 h-4 mr-2" />
-                      Send Message
-                    </Button>
-                  </Link>
                 </div>
               </CardContent>
             </Card>
@@ -413,32 +384,6 @@ export default function ItemDetailPage() {
                 <p>• Use the campus security office for exchanges</p>
                 <p>• Report suspicious behavior to administrators</p>
                 <p>• Never share personal information unnecessarily</p>
-              </CardContent>
-            </Card>
-
-            {/* Similar Items */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Similar Items</CardTitle>
-                <CardDescription>Other items you might be interested in</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="flex space-x-3">
-                    <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden">
-                      <img
-                        src="/placeholder.svg?height=64&width=64"
-                        alt="Similar item"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-medium text-sm text-gray-900">iPhone 13 Pro</p>
-                      <p className="text-xs text-gray-600">Library 1st Floor</p>
-                      <p className="text-xs text-gray-500">2 days ago</p>
-                    </div>
-                  </div>
-                ))}
               </CardContent>
             </Card>
           </div>
