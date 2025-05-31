@@ -543,12 +543,12 @@ export default function ReportPage() {
                         )}
                       </div>
                       <div>
-                        <Label htmlFor="email">Email</Label>
+                        {/* <Label htmlFor="email">Email</Label>
                         <Input
                           id="email"
                           value={formik.values.email}
                           className="mt-1 bg-gray-50"
-                        />
+                        /> */}
                       </div>
                     </div>
                   </div>

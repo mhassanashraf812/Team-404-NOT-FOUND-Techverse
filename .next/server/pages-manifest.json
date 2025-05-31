@@ -2,5 +2,8 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/api/auth/[...nextauth]": "pages/api/auth/[...nextauth].js"
+  "/api/notifications/getnotifications": "pages/api/notifications/getnotifications.js",
+  "/api/notifications/markread": "pages/api/notifications/markread.js",
+  "/api/auth/[...nextauth]": "pages/api/auth/[...nextauth].js",
+  "/api/items/getitems": "pages/api/items/getitems.js"
 }

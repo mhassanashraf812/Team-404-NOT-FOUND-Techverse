@@ -44,25 +44,29 @@ export default function HomePage() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <Search className="w-5 h-5 text-white" />
-              </div>
-              <h1 className="text-xl font-semibold text-gray-900">UMT Lost & Found</h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Link href="/auth/login">
-                <Button variant="outline">Sign In</Button>
-              </Link>
-              <Link href="/auth/register">
-                <Button className="bg-blue-600 hover:bg-blue-700">Get Started</Button>
-              </Link>
-            </div>
-          </div>
+  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-4 space-y-4 sm:space-y-0">
+      {/* Logo and Title */}
+      <div className="flex items-center space-x-4">
+        <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+          <Search className="w-5 h-5 text-white" />
         </div>
-      </header>
+        <h1 className="text-xl font-semibold text-gray-900">UMT Lost & Found</h1>
+      </div>
+
+      {/* Buttons */}
+      <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+        <Link href="/auth/login">
+          <Button variant="outline" className="w-full sm:w-auto">Sign In</Button>
+        </Link>
+        <Link href="/auth/register">
+          <Button className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto">Get Started</Button>
+        </Link>
+      </div>
+    </div>
+  </div>
+</header>
+
 
       {/* Hero Section */}
       <section className="bg-white py-16">
