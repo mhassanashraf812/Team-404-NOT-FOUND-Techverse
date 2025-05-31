@@ -24,14 +24,14 @@ export default function HomePage() {
       time: "4 hours ago",
       category: "Bags",
     },
-    {
-      id: 3,
-      title: "Student ID Card",
-      type: "found",
-      location: "Cafeteria",
-      time: "1 day ago",
-      category: "Documents",
-    },
+    // {
+    //   id: 3,
+    //   title: "Student ID Card",
+    //   type: "found",
+    //   location: "Cafeteria",
+    //   time: "1 day ago",
+    //   category: "Documents",
+    // },
   ]
 
   const stats = [
